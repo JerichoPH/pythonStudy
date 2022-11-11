@@ -225,3 +225,7 @@ if __name__ == '__main__':
 		# 读取多行数据
 		excel_content = xlrd.set_sheet(xlrd.get_excel().active).set_original_row_number(2).set_finished_row_number(5).set_title(excel_title).read_rows().to_dict
 		print('EX5：', excel_content)
+		
+		# 获取列表数据
+		excel_content = xlrd.set_sheet(xlrd.get_excel().active).set_original_row_number(2).set_finished_row_number(5).set_title(excel_title).read_rows().to_list
+		print('EX6：', excel_content)
