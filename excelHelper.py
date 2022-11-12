@@ -1,3 +1,6 @@
+import argparse
+import os
+import sys
 from typing import List, Any, Dict
 
 import openpyxl
@@ -202,30 +205,235 @@ class ExcelReader:
 		return self._content
 
 
-if __name__ == '__main__':
-	filename = 'factories.xlsx'
+class ExcelWriterCell:
+	_content: str = ''
+	_location: str = ''
 	
-	with ExcelReader(filename=filename) as xlrd:
-		# 通过Sheet名称进行读取
-		excel_content = xlrd.read_entire_sheet_by_name('Sheet1').to_dict
-		print('EX1：', excel_content)
+	def __init__(self, location: str, content: str = ''):
+		self._location = location
+		self._content = content
+	
+	def get_location(self) -> str:
+		"""
+		返回单元格所在位置
+		:return: 单元格坐标
+		:rtype: str
+		"""
+		return self._location
+	
+	def set_location(self, location: str) -> __init__:
+		"""
+		设置单元格所在位置
+		:param location: 单元格坐标
+		:type location: str
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriterCell
+		"""
+		self._location = location
+		return self
+	
+	def get_content(self) -> str:
+		"""
+		获取单元格内容
+		:return:
+		:rtype:
+		"""
+		return self._content
+	
+	def set_content(self, content: str = '') -> __init__:
+		"""
+		设置单元格内容
+		:param content: 单元格内容
+		:type content:
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriterCell
+		"""
+		self._content = content
+		return self
+
+
+class ExcelWriterRow:
+	_cells: Dict[str:ExcelWriterCell] = {}
+	
+	def __init__(self, cells: Dict[str:ExcelWriterCell] = None):
+		if cells:
+			self._cells = cells
+	
+	def get_cells(self) -> Dict[str:ExcelWriterCell]:
+		"""
+		获取单元格组
+		:return: 若干单元格组成的字典
+		:rtype: Dict[str:ExcelWriterCell]
+		"""
+		return self._cells
+	
+	def set_cells(self, cells: Dict[str:ExcelWriterCell]) -> __init__:
+		"""
+		设置单元格组
+		:param cells: 字典形式的单元格组合
+		:type cells: Dict[str:ExcelWriterCell]
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriterRow
+		"""
+		self._cells = cells
+		return self
+
+
+class ExcelWriter:
+	_excel: openpyxl.Workbook = None
+	_sheet: openpyxl.worksheet.worksheet.Worksheet = None
+	_filename: str = ''
+	
+	def __init__(self, filename: str):
+		"""
+		初始化
+		:param filename: 文件名
+		:type filename: str
+		"""
+		self._excel = openpyxl.Workbook()
+		self._filename = filename
+		self._sheet = self._excel.active
+	
+	def __enter__(self) -> __init__:
+		return self
+	
+	def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+		self._excel.close()
+	
+	def set_sheet_name(self, worksheet_name: str) -> __init__:
+		"""
+		设置工作表名称
+		:param worksheet_name: 工作表名称
+		:type worksheet_name:  str
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriter
+		"""
+		self._sheet.title = worksheet_name
+		return self
+	
+	def add_sheet(self, worksheet_name: str, worksheet_index: int = None) -> __init__:
+		"""
+		增加一个工作表
+		:param worksheet_name: 工作簿名称
+		:type worksheet_name: str
+		:param worksheet_index: 工作簿所在位置
+		:type worksheet_index: int
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriter
+		"""
+		self._excel.create_sheet(title=worksheet_name, index=worksheet_index)
+		self._sheet = self._excel[worksheet_name]
+		return self
+	
+	def del_sheet(self, del_worksheet_name: str, select_worksheet_name: str = '') -> __init__:
+		"""
+		删除一个工作表
+		:param del_worksheet_name: 需要删除的工作表名称
+		:type del_worksheet_name: str
+		:param select_worksheet_name: 删除工作表之后，选中的工作表名称
+		:type select_worksheet_name: str
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriter
+		"""
+		del self._excel[del_worksheet_name]
+		if select_worksheet_name:
+			self._sheet = self._excel[select_worksheet_name]
+		else:
+			self._sheet = None
+		return self
+	
+	def add_cell(self, excel_writer_cell: ExcelWriterCell) -> __init__:
+		"""
+		添加单元格
+		:param excel_writer_cell: 单元格对象
+		:type excel_writer_cell: ExcelWriterCell
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriter
+		"""
+		self._sheet[excel_writer_cell.get_location()] = excel_writer_cell.get_content()
+		return self
+	
+	def del_cell(self, location: str) -> __init__:
+		"""
+		删除一个单元格
+		:param location: 单元格坐标
+		:type location: str
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriter
+		"""
+		del self._sheet[location]
+		return self
+	
+	def add_row(self, excel_writer_row: ExcelWriterRow) -> __init__:
+		"""
+		添加一行数据
+		:param excel_writer_row: 添加一行数据
+		:type excel_writer_row: ExcelWriterRow
+		:return: 本类对象
+		:rtype: excelHelper.ExcelWriter
+		"""
+		pass
+	
+	def save(self) -> __init__:
+		"""
+		保存文件
+		:return:
+		:rtype:
+		"""
+		self._excel.save(self._filename)
+		return self
+
+
+if __name__ == '__main__':
+	"""
+	参数说明
+	1、-T --operation_type：【两个可选参数reader和writer】分别控制演示ExcelReader和ExcelWriter两个功能
+	2、-I --input_filename：用于演示ExcelReader功能时，读取的表名称
+	4、-R --relative_path：作用于【reader和writer】两个文件名是否使用相路径，默认：True
+	"""
+	parser = argparse.ArgumentParser()
+	parser.description = 'excel读取文件工区（只支持2007版）'
+	parser.add_argument('-T', '--operation_type', help='执行类型：reader、writer', type=str, default='')
+	parser.add_argument('-I', '--input_filename', help='传入文件名，用于reader读取的excel的参数', type=str, default='')
+	parser.add_argument('-R', '--relative_path', help='是否使用相对路径', type=bool, default=True)
+	args = parser.parse_args()
+	operation_type = args.operation_type
+	input_filename = args.input_filename
+	relative_path = args.relative_path
+	
+	if operation_type == 'reader':
+		# ExcelReader演示
+		with ExcelReader(filename=os.path.join(sys.path[0], input_filename) if relative_path else input_filename) as xlrd:
+			# 通过工作表名称进行读取
+			excel_content = xlrd.read_entire_sheet_by_name('Sheet1').to_dict
+			print('example1：', excel_content)
+			
+			# 读取第一个Sheet
+			excel_content = xlrd.read_entire_sheet_by_first().to_dict
+			print('example：', excel_content)
+			
+			# 通过激活Sheet进行读取
+			excel_content = xlrd.read_entire_sheet_by_active().to_dict
+			print('example3：', excel_content)
+			
+			# 读取表头
+			excel_title = xlrd.set_read_title_row_number(0).set_title(xlrd.get_excel().active).read_title().get_title()
+			print('example：', excel_title)
+			
+			# 读取多行数据
+			excel_content = xlrd.set_sheet(xlrd.get_excel().active).set_original_row_number(2).set_finished_row_number(5).set_title(excel_title).read_rows().to_dict
+			print('example5：', excel_content)
+			
+			# 获取列表数据
+			excel_content = xlrd.set_sheet(xlrd.get_excel().active).set_original_row_number(2).set_finished_row_number(5).set_title(excel_title).read_rows().to_list
+			print('example6：', excel_content)
+	
+	elif operation_type == 'writer':
+		# ExcelWriter演示
+		# 设置单独单元格写入
+		with ExcelWriter(filename=os.path.join(sys.path[0], 'test-1.xlsx') if relative_path else 'test-1.xlsx') as xlwt:
+			xlwt.set_sheet_name('测试表').add_cell(ExcelWriterCell('A1', '测试1')).add_cell(ExcelWriterCell('B2', '测试2')).save()
 		
-		# 读取第一个Sheet
-		excel_content = xlrd.read_entire_sheet_by_first().to_dict
-		print('EX2：', excel_content)
-		
-		# 通过激活Sheet进行读取
-		excel_content = xlrd.read_entire_sheet_by_active().to_dict
-		print('EX3：', excel_content)
-		
-		# 读取表头
-		excel_title = xlrd.set_read_title_row_number(0).set_title(xlrd.get_excel().active).read_title().get_title()
-		print('EX4：', excel_title)
-		
-		# 读取多行数据
-		excel_content = xlrd.set_sheet(xlrd.get_excel().active).set_original_row_number(2).set_finished_row_number(5).set_title(excel_title).read_rows().to_dict
-		print('EX5：', excel_content)
-		
-		# 获取列表数据
-		excel_content = xlrd.set_sheet(xlrd.get_excel().active).set_original_row_number(2).set_finished_row_number(5).set_title(excel_title).read_rows().to_list
-		print('EX6：', excel_content)
+		# 设置一行单元格写入
+		with ExcelWriter(filename=os.path.join(sys.path[0], 'test-2.xlsx') if relative_path else 'test-2.xlsx') as xlwt:
+			pass
