@@ -1,11 +1,10 @@
 import argparse
 import os
 import sys
-from pprint import pprint
-from typing import Any, Dict
+from typing import Any
 
 import openpyxl
-from openpyxl.styles import Font, Border, Side
+from openpyxl.styles import Font, PatternFill
 
 
 class ExcelReader:
@@ -289,6 +288,7 @@ class ExcelWriterCell:
 	_border_left_color: str = '000000'
 	_border_right_style: str = None
 	_border_right_color: str = '000000'
+	_fill_fg_color: str = None
 	
 	BORDER_STYLE_THIN = 'thin'
 	BORDER_STYLE_DOTTED = 'dotted'
@@ -327,6 +327,7 @@ class ExcelWriterCell:
 			border_left_color: str = None,
 			border_right_style: str = None,
 			border_right_color: str = None,
+			fill_fg_color: str = 'FFFFFF',
 	):
 		"""
 		初始化
@@ -362,6 +363,8 @@ class ExcelWriterCell:
 		:type border_left_style: str
 		:param border_right_style: 右边框样式
 		:type border_right_style: str
+		:param fill_fg_color: 填充背景色
+		:type fill_fg_color: str
 		"""
 		self._location = location
 		self._content = content
@@ -403,6 +406,8 @@ class ExcelWriterCell:
 			self._border_right_style = border_right_style
 		if border_right_color is not None:
 			self._border_right_color = border_right_color
+		if fill_fg_color is not None:
+			self._fill_fg_color = fill_fg_color
 	
 	def get_content(self) -> str:
 		"""
@@ -857,6 +862,33 @@ class ExcelWriterCell:
 			left=openpyxl.styles.Side(style=self._border_left_style if self._border_left_style is not None else self._border_style, color=self._border_left_color if self._border_left_color is not None else self._border_color),
 			right=openpyxl.styles.Side(style=self._border_right_style if self._border_right_style is not None else self._border_style, color=self._border_right_color if self._border_right_color is not None else self._border_color),
 		)
+	
+	def get_fill_fg_color(self) -> str:
+		"""
+		获取填充色
+		:return: 填充色
+		:rtype: str
+		"""
+		return self._fill_fg_color
+	
+	def set_fill_fg_color(self, fill_fg_color) -> __init__:
+		"""
+		设置填充色
+		:param fill_fg_color: 填充色
+		:type fill_fg_color: str
+		:return: 本类对象
+		:rtype: str
+		"""
+		self._fill_fg_color = fill_fg_color
+		return self
+	
+	def get_fill(self) -> openpyxl.styles.PatternFill:
+		"""
+		获取填充样式
+		:return: 填充样式
+		:rtype: openpyxl.styles.PatternFill
+		"""
+		return openpyxl.styles.PatternFill(patternType='solid', fgColor=self._fill_fg_color)
 
 
 class ExcelWriterRow:
@@ -960,6 +992,7 @@ class ExcelWriter:
 		self._sheet[excel_writer_cell.get_location()] = excel_writer_cell.get_content()
 		self._sheet[excel_writer_cell.get_location()].font = excel_writer_cell.get_font()
 		self._sheet[excel_writer_cell.get_location()].border = excel_writer_cell.get_border()
+		self._sheet[excel_writer_cell.get_location()].fill = excel_writer_cell.get_fill()
 		return self
 	
 	def del_cell(self, location: str) -> __init__:
@@ -1051,7 +1084,8 @@ if __name__ == '__main__':
 					border_style=
 					ExcelWriterCell.BORDER_STYLE_DOTTED,
 					border_color='00FFFF',
-					border_left_style=ExcelWriterCell.BORDER_STYLE_MEDIUM_DASH_DOT
+					border_left_style=ExcelWriterCell.BORDER_STYLE_MEDIUM_DASH_DOT,
+					fill_fg_color='FFFF00',
 				)
 			). \
 				save()
