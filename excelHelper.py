@@ -1,7 +1,7 @@
 import argparse
 import os
 import sys
-from typing import Any
+from typing import Any, List, Dict, Tuple
 
 import openpyxl
 
@@ -259,6 +259,87 @@ class ExcelReader:
         return self
 
     @property
+    def get_row_dimensions(self) -> Dict[str, openpyxl.worksheet.dimensions.RowDimension]:
+        """
+        获取所有行高
+        :return: 全表行高
+        :rtype: dict
+        """
+        return self._sheet.row_dimensions
+
+    def set_row_dimensions(self, row_index: int, row_height: float) -> __init__:
+        """
+        设置行高
+        :param row_index: 行索引
+        :type row_index: int
+        :param row_height: 行高（0～409，默认12.75）
+        :type row_height: float
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        self._sheet[row_index].height = row_height
+        return self
+
+    @property
+    def get_column_dimensions(self) -> List[Tuple[str, openpyxl.worksheet.dimensions.ColumnDimension]]:
+        """
+        获取列宽
+        :return: 全表列宽
+        :rtype: list
+        """
+        return self._sheet.column_dimensions
+
+    def set_column_dimensions(self, column_index: str, column_width: float) -> __init__:
+        """
+        设置列宽
+        :param column_index: 列坐标
+        :type column_index: str
+        :param column_width: 列宽（0～255，默认8.43个字符）
+        :type column_width: float
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        self._sheet[column_index].width = column_width
+        return self
+
+    def set_merge_cells(self, original_cell_coordinate: str, finished_cell_coordinate: str) -> __init__:
+        """
+        设置合并单元格
+        :param original_cell_coordinate: 起始坐标
+        :type original_cell_coordinate: str
+        :param finished_cell_coordinate: 终止坐标
+        :type finished_cell_coordinate: str
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        self._sheet.merge_cells(f'{original_cell_coordinate}:{finished_cell_coordinate}')
+        return self
+
+    def set_unmerge_cells(self, original_cell_coordinate: str, finished_cell_coordinate: str) -> __init__:
+        """
+        拆分单元格
+        :param original_cell_coordinate: 起始坐标
+        :type original_cell_coordinate: str
+        :param finished_cell_coordinate: 终止坐标
+        :type finished_cell_coordinate: str
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        self._sheet.unmerge_cells(f'{original_cell_coordinate}:{finished_cell_coordinate}')
+        return self
+
+    def set_freeze_panes(self, cell_coordinate: str) -> __init__:
+        """
+        设置冻结窗口
+        :param cell_coordinate: 单元格坐标（A1：冻结首行，B1：冻结首列，B2：冻结首行和首列）
+        :type cell_coordinate: str
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        self._sheet.freeze_panes = cell_coordinate
+        return self
+
+    @property
     def to_dict(self) -> dict:
         """
         返回字典格式数据（必须设置表头）
@@ -267,7 +348,7 @@ class ExcelReader:
         """
         if self._title:
             contents = [dict(zip(self._title, content)) for content in self._content]
-            return {str(row_number + self.get_original_row_number()): row_datum for row_number, row_datum in enumerate(contents)}
+            return {str(row_number + self.get_original_row_number): row_datum for row_number, row_datum in enumerate(contents)}
         else:
             return {}
 
@@ -283,7 +364,7 @@ class ExcelReader:
 
 class ExcelWriterCell:
     _content: str = ''
-    _location: str = None
+    _coordinate: str = None
     _font_name: str = None
     _font_color: str = None
     _font_size: float = None
@@ -331,7 +412,7 @@ class ExcelWriterCell:
     def __init__(
             self,
             content='',
-            location: str = None,
+            coordinate: str = None,
             font_name: str = None,
             font_color: str = None,
             font_size: float = None,
@@ -351,7 +432,7 @@ class ExcelWriterCell:
             border_left_color: str = None,
             border_right_style: str = None,
             border_right_color: str = None,
-            fill_fg_color: str = 'FFFFFF',
+            fill_fg_color: str = None,
             alignment_horizontal: str = None,
             alignment_vertical: str = None,
     ):
@@ -359,8 +440,8 @@ class ExcelWriterCell:
         初始化
         :param content: 单元格内容
         :type content: Any
-        :param location: 单元格所在坐标
-        :type location: str
+        :param coordinate: 单元格所在坐标
+        :type coordinate: str
         :param font_name: 字体
         :type font_name: str
         :param font_color: 颜色
@@ -396,8 +477,8 @@ class ExcelWriterCell:
         :param alignment_vertical: 字体垂直居中
         :type alignment_vertical: str
         """
-        self._location = location
         self._content = content
+        self._coordinate = coordinate
         if font_name is not None:
             self._font_name = font_name
         if font_color is not None:
@@ -464,23 +545,23 @@ class ExcelWriterCell:
         return self
 
     @property
-    def get_location(self) -> str:
+    def get_coordinate(self) -> str:
         """
         返回单元格所在位置
         :return: 单元格坐标
         :rtype: str
         """
-        return self._location
+        return self._coordinate
 
-    def set_location(self, location: str) -> __init__:
+    def set_coordinate(self, coordinate: str) -> __init__:
         """
         设置单元格所在位置
-        :param location: 单元格坐标
-        :type location: str
+        :param coordinate: 单元格坐标
+        :type coordinate: str
         :return: 本类对象
         :rtype: excelHelper.ExcelWriterCell
         """
-        self._location = location
+        self._coordinate = coordinate
         return self
 
     @property
@@ -921,11 +1002,11 @@ class ExcelWriterCell:
         )
 
     @property
-    def get_fill_fg_color(self) -> str:
+    def get_fill_fg_color(self) -> str or None:
         """
         获取填充色
         :return: 填充色
-        :rtype: str
+        :rtype: str or None
         """
         return self._fill_fg_color
 
@@ -941,13 +1022,15 @@ class ExcelWriterCell:
         return self
 
     @property
-    def get_fill(self) -> openpyxl.styles.PatternFill:
+    def get_fill(self) -> openpyxl.styles.PatternFill | None:
         """
         获取填充样式
         :return: 填充样式
-        :rtype: openpyxl.styles.PatternFill
+        :rtype: openpyxl.styles.PatternFill | None
         """
-        return openpyxl.styles.PatternFill(patternType='solid', fgColor=self.get_fill_fg_color)
+        if self.get_fill_fg_color:
+            return openpyxl.styles.PatternFill(patternType='solid', fgColor=self.get_fill_fg_color)
+        return None
 
     @property
     def get_alignment_horizontal(self) -> str:
@@ -1098,11 +1181,12 @@ class ExcelWriter:
         :return: 本类对象
         :rtype: excelHelper.ExcelWriter
         """
-        self._sheet[excel_writer_cell.get_location] = excel_writer_cell.get_content
-        self._sheet[excel_writer_cell.get_location].font = excel_writer_cell.get_font
-        self._sheet[excel_writer_cell.get_location].border = excel_writer_cell.get_border
-        self._sheet[excel_writer_cell.get_location].fill = excel_writer_cell.get_fill
-        self._sheet[excel_writer_cell.get_location].alignment = excel_writer_cell.get_alignment
+        self._sheet[excel_writer_cell.get_coordinate] = excel_writer_cell.get_content
+        self._sheet[excel_writer_cell.get_coordinate].font = excel_writer_cell.get_font
+        self._sheet[excel_writer_cell.get_coordinate].border = excel_writer_cell.get_border
+        if excel_writer_cell.get_fill is not None:
+            self._sheet[excel_writer_cell.get_coordinate].fill = excel_writer_cell.get_fill
+        self._sheet[excel_writer_cell.get_coordinate].alignment = excel_writer_cell.get_alignment
         return self
 
     def del_cell(self, location: str) -> __init__:
@@ -1114,6 +1198,159 @@ class ExcelWriter:
         :rtype: excelHelper.ExcelWriter
         """
         del self._sheet[location]
+        return self
+
+    def set_auto_filter_by_coordinate(self, original_cell_coordinate: str, finished_cell_coordinate: str) -> __init__:
+        """
+        通过坐标设置筛选范围
+        :param original_cell_coordinate: 起始坐标
+        :type original_cell_coordinate: str
+        :param finished_cell_coordinate: 终止坐标
+        :type finished_cell_coordinate: str
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet.auto_filter.ref = f'{original_cell_coordinate}:{finished_cell_coordinate}'
+        return self
+
+    def set_auto_filter_by_column(self, column_index: int, values: []) -> __init__:
+        """
+        通过列索引设置筛选条件
+        :param column_index: 列索引
+        :type column_index: int
+        :param values: 筛选条件
+        :type values: str[]
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet.auto_filter.add_filter_column(col_id=column_index, vars=values)
+        return self
+
+    def set_sort_condition(self, original_cell_coordinate: str, finished_cell_coordinate: str, descending: bool = False) -> __init__:
+        """
+        设置排序
+        :param original_cell_coordinate: 起始坐标
+        :type original_cell_coordinate: str
+        :param finished_cell_coordinate: 终止坐标
+        :type finished_cell_coordinate: str
+        :param descending: 是否倒叙：False
+        :type descending: bool
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet.auto_filter.add_sort_condition(ref=f'{original_cell_coordinate}:{finished_cell_coordinate}', descending=descending)
+        return self
+
+    @property
+    def get_max_column(self) -> int:
+        """
+        获取当前工作表列总数
+        :return: 列总数
+        :rtype: int
+        """
+        return self._sheet.max_column
+
+    @property
+    def get_max_row(self):
+        """
+        获取当前工作表行总数
+        :return: 行总数
+        :rtype: int
+        """
+        return self._sheet.max_row
+
+    @property
+    def get_row_dimensions(self) -> Dict[str, openpyxl.worksheet.dimensions.RowDimension]:
+        """
+        获取所有行高
+        :return: 全表行高
+        :rtype: dict
+        """
+        return self._sheet.row_dimensions
+
+    def set_row_dimensions(self, row_index: int, row_height: float) -> __init__:
+        """
+        设置行高
+        :param row_index: 行索引
+        :type row_index: int
+        :param row_height: 行高（0～409，默认12.75）
+        :type row_height: float
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet[row_index].height = row_height
+        return self
+
+    @property
+    def get_column_dimensions(self) -> List[Tuple[str, openpyxl.worksheet.dimensions.ColumnDimension]]:
+        """
+        获取列宽
+        :return: 全表列宽
+        :rtype: list
+        """
+        return self._sheet.column_dimensions
+
+    def set_column_dimensions(self, column_index: str, column_width: float) -> __init__:
+        """
+        设置列宽
+        :param column_index: 列坐标
+        :type column_index: str
+        :param column_width: 列宽（0～255，默认：8.43个字符）
+        :type column_width: float
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet[column_index].width = column_width
+        return self
+
+    def set_merge_cells(self, original_cell_coordinate: str, finished_cell_coordinate: str) -> __init__:
+        """
+        设置合并单元格
+        :param original_cell_coordinate: 起始坐标
+        :type original_cell_coordinate: str
+        :param finished_cell_coordinate: 终止坐标
+        :type finished_cell_coordinate: str
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet.merge_cells(f'{original_cell_coordinate}:{finished_cell_coordinate}')
+        return self
+
+    def set_unmerge_cells(self, original_cell_coordinate: str, finished_cell_coordinate: str) -> __init__:
+        """
+        拆分单元格
+        :param original_cell_coordinate: 起始坐标
+        :type original_cell_coordinate: str
+        :param finished_cell_coordinate: 终止坐标
+        :type finished_cell_coordinate: str
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet.unmerge_cells(f'{original_cell_coordinate}:{finished_cell_coordinate}')
+        return self
+
+    def set_freeze_panes(self, cell_coordinate: str = None) -> __init__:
+        """
+        设置冻结窗口
+        :param cell_coordinate: 单元格坐标（A1：冻结首行，B1：冻结首列，B2：冻结首行和首列，设置为None时取消冻结）
+        :type cell_coordinate: str
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        self._sheet.freeze_panes = cell_coordinate
+        return self
+
+    def set_chart_bar(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.BarChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
     def save(self) -> __init__:
@@ -1129,19 +1366,13 @@ class ExcelWriter:
 if __name__ == '__main__':
     """
     参数说明
-    1、-T --operation_type：【三个可选参数reader、writer和update】分别控制演示读取、写入和修改原表三个功能
-    2、-I --input_filename：用于演示读取功能时，读取的表名称
-    4、-R --relative_path：是否使用相路径，默认：True
+    -T --operation_type：【三个可选参数reader、writer和update】分别控制演示读取、写入和修改原表三个功能
     """
     parser = argparse.ArgumentParser()
     parser.description = 'excel读取文件工区（只支持2007版）'
     parser.add_argument('-T', '--operation_type', help='执行类型：reader、writer、update', type=str, default='')
-    # parser.add_argument('-I', '--input_filename', help='传入文件名，用于reader读取的excel的参数', type=str, default='')
-    # parser.add_argument('-R', '--relative_path', help='是否使用相对路径', type=bool, default=True)
     args = parser.parse_args()
     operation_type = args.operation_type
-    # input_filename = args.input_filename
-    # relative_path = args.relative_path
 
     input_filename = 'factories.xlsx'
     relative_path = True
@@ -1162,7 +1393,7 @@ if __name__ == '__main__':
             print('example3：', excel_content)
 
             # 读取表头
-            excel_title = xlrd.set_sheet_by_active().set_read_title_row_number(1).read_title().get_title()
+            excel_title = xlrd.set_sheet_by_active().set_read_title_row_number(1).read_title().get_title
             print('example：', excel_title)
 
             # 读取多行数据
@@ -1173,6 +1404,8 @@ if __name__ == '__main__':
             excel_content = xlrd.set_sheet_by_active().set_original_row_number(2).set_finished_row_number(5).set_title(excel_title).read_rows().to_list
             print('example6：', excel_content)
 
+            print(xlrd.set_sheet_by_active().get_row_dimensions)
+
     elif operation_type == 'writer':
         # ExcelWriter演示
         # 设置单独单元格写入
@@ -1181,7 +1414,7 @@ if __name__ == '__main__':
                 add_cell(
                 ExcelWriterCell(
                     content='测试1',  # 单元格内容
-                    location='A1',  # 单元格坐标
+                    coordinate='A1',  # 单元格坐标
                     font_name='宋体',  # 字体
                     font_size=18,  # 字号
                     font_color='FF0000',  # 字体颜色
@@ -1192,13 +1425,40 @@ if __name__ == '__main__':
                 add_cell(
                 ExcelWriterCell(
                     content='测试2',  # 单元格内容
-                    location='B2',  # 单元格坐标
+                    coordinate='B2',  # 单元格坐标
                     border_style=ExcelWriterCell.BORDER_STYLE_DOTTED,  # 整体边框样式
                     border_color='00FFFF',  # 整体边框颜色
                     border_left_style=ExcelWriterCell.BORDER_STYLE_MEDIUM_DASH_DOT,  # 左边框样式
                     fill_fg_color='FFFF00',  # 填充背景色
                 )
             ). \
+                add_cell(
+                ExcelWriterCell(
+                    content='合并测试',
+                    coordinate='C1',
+                    alignment_horizontal=ExcelWriterCell.ALIGNMENT_HORIZONTAL_CENTER,
+                    alignment_vertical=ExcelWriterCell.ALIGNMENT_VERTICAL_CENTER
+                )
+            ). \
+                set_auto_filter_by_coordinate(original_cell_coordinate='A1', finished_cell_coordinate=f'B{xlwt.get_max_row}'). \
+                set_merge_cells('C1', 'D5'). \
+                set_freeze_panes('B2'). \
+                save()
+
+        # 制作Excel图表
+        with ExcelWriter(filename=os.path.join(sys.path[0], 'test-3.xlsx') if relative_path else 'test-3.xlsx') as xlwt:
+            xlwt. \
+                add_cell(ExcelWriterCell(content='姓名', coordinate='A1', )). \
+                add_cell(ExcelWriterCell(content='工资', coordinate='B1', )). \
+                add_cell(ExcelWriterCell(content='张三', coordinate='A2', )). \
+                add_cell(ExcelWriterCell(content=100, coordinate='B2', )). \
+                add_cell(ExcelWriterCell(content='李四', coordinate='A3', )). \
+                add_cell(ExcelWriterCell(content=200, coordinate='B3', )). \
+                add_cell(ExcelWriterCell(content='王五', coordinate='A4', )). \
+                add_cell(ExcelWriterCell(content=300, coordinate='B4', )). \
+                add_cell(ExcelWriterCell(content='赵六', coordinate='A5', )). \
+                add_cell(ExcelWriterCell(content=400, coordinate='B5', )). \
+                set_chart_bar(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='F1'). \
                 save()
 
         # 设置一行单元格写入
