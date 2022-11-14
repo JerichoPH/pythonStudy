@@ -339,6 +339,142 @@ class ExcelReader:
         self._sheet.freeze_panes = cell_coordinate
         return self
 
+    def add_chart_bar(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        添加条形图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.BarChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
+        return self
+
+    def add_chart_line(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        设置折线图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.LineChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
+        return self
+
+    def add_chart_scatter(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        添加散点图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.ScatterChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
+        return self
+
+    def add_chart_pie(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        添加饼图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.PieChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
+        return self
+
     @property
     def to_dict(self) -> dict:
         """
@@ -1340,9 +1476,132 @@ class ExcelWriter:
         self._sheet.freeze_panes = cell_coordinate
         return self
 
-    def set_chart_bar(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_bar(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        添加条形图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
         values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
         chart = openpyxl.chart.BarChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
+        return self
+
+    def add_chart_line(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        设置折线图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.LineChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
+        return self
+
+    def add_chart_scatter(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        添加散点图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.ScatterChart()
+        if chart_title is not None:
+            chart.title = chart_title
+        if x_axis_title is not None:
+            chart.x_axis.title = x_axis_title
+        if y_axis_title is not None:
+            chart.y_axis.title = y_axis_title
+        chart.add_data(values)
+        self._sheet.add_chart(chart, chart_target_coordinate)
+        return self
+
+    def add_chart_pie(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+        """
+        添加饼图
+        :param original_row:
+        :type original_row:
+        :param original_col:
+        :type original_col:
+        :param finished_row:
+        :type finished_row:
+        :param finished_col:
+        :type finished_col:
+        :param chart_target_coordinate:
+        :type chart_target_coordinate:
+        :param chart_title:
+        :type chart_title:
+        :param x_axis_title:
+        :type x_axis_title:
+        :param y_axis_title:
+        :type y_axis_title:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+        values = openpyxl.chart.Reference(self._sheet, min_row=original_row, min_col=original_col, max_row=finished_row, max_col=finished_col)
+        chart = openpyxl.chart.PieChart()
         if chart_title is not None:
             chart.title = chart_title
         if x_axis_title is not None:
@@ -1458,7 +1717,10 @@ if __name__ == '__main__':
                 add_cell(ExcelWriterCell(content=300, coordinate='B4', )). \
                 add_cell(ExcelWriterCell(content='赵六', coordinate='A5', )). \
                 add_cell(ExcelWriterCell(content=400, coordinate='B5', )). \
-                set_chart_bar(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='F1'). \
+                add_chart_bar(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='F1'). \
+                add_chart_line(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='G2'). \
+                add_chart_scatter(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='H3'). \
+                add_chart_pie(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='I4'). \
                 save()
 
         # 设置一行单元格写入
