@@ -138,6 +138,7 @@ if __name__ == '__main__':
 	StdoutHelper('前景色 >> 30黑色').set_bg_color(StdoutHelper.COLOR_CYAN).print_line()
 	print('-' * 50)
 	print('输出测试：\033[30;47m（前景色+背景色） >> 30黑色+47白色\033[0m')
+	StdoutHelper('（前景色+背景色） >> 30黑色+47白色').set_bg_color(StdoutHelper.COLOR_BLACK).set_bg_color(StdoutHelper.COLOR_WHITE).print_line()
 	print('输出测试：\033[30;41m（前景色+背景色） >> 30黑色+41红色\033[0m')
 	print('-' * 50)
 	print('输出测试：\033[0;30;41m样式 >> 0终端默认\033[0m')
