@@ -1219,30 +1219,62 @@ class ExcelWriterCell:
 
 
 class ExcelWriterRow:
-    _cells: dict = {}
+    _row_index: int = None
+    _cells: Dict[str, ExcelWriterCell] = {}
 
-    def __init__(self, cells: dict = None):
-        if cells:
-            self._cells = cells
+    def __init__(self, row_index: int, cells: List[ExcelWriterCell] = None):
+        """
+        初始化
+        :param row_index: 行索引
+        :type row_index: int
+        :param cells: 单元格
+        :type cells: List[ExcelWriterCell]
+        """
+        self._row_index = row_index
+        if cells is not None:
+            for column_index, cell in enumerate(cells):
+                self._cells.setdefault(openpyxl.utils.get_column_letter(column_index + 1), cell)
 
     @property
-    def get_cells(self) -> dict:
+    def get_row_index(self) -> int:
         """
-        获取单元格组
-        :return: 若干单元格组成的字典
-        :rtype: Dict[str:ExcelWriterCell]
+        获取行索引
+        :return: 行索引
+        :rtype: int
         """
-        return self._cells
+        return self._row_index
 
-    def set_cells(self, cells: dict) -> __init__:
+    def set_row_index(self, row_index: int) -> __init__:
         """
-        设置单元格组
-        :param cells: 字典形式的单元格组合
-        :type cells: Dict[str:ExcelWriterCell]
+        设置行索引
+        :param row_index: 行索引
+        :type row_index: int
         :return: 本类对象
         :rtype: excelHelper.ExcelWriterRow
         """
-        self._cells = cells
+        self._row_index = row_index
+        return self
+
+    @property
+    def get_cells(self) -> Dict[str, ExcelWriterCell]:
+        """
+        获取单元格组
+        :return: 若干单元格组成的数组（数组下标自动转列编号）
+        :rtype: Dict[str,ExcelWriterCell]
+        """
+        return self._cells
+
+    def set_cells(self, cells: List[ExcelWriterCell]) -> __init__:
+        """
+        设置单元格组
+        :param cells: 字典形式的单元格组合
+        :type cells: List[ExcelWriterCell]
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriterRow
+        """
+        for column_index, cell in enumerate(cells):
+            cell.set_coordinate(f'{openpyxl.utils.get_column_letter(column_index + 1)}{self._row_index}')
+            self._cells.setdefault(openpyxl.utils.get_column_letter(column_index + 1), cell)
         return self
 
 
@@ -1335,6 +1367,16 @@ class ExcelWriter:
         """
         del self._sheet[location]
         return self
+
+    def add_row(self, excel_writer_row: ExcelWriterRow) -> __init__:
+        """
+        添加行
+        :param excel_writer_row:
+        :type excel_writer_row:
+        :return: 本类对象
+        :rtype: excelHelper.ExcelWriter
+        """
+
 
     def set_auto_filter_by_coordinate(self, original_cell_coordinate: str, finished_cell_coordinate: str) -> __init__:
         """
@@ -1623,6 +1665,10 @@ class ExcelWriter:
 
 
 if __name__ == '__main__':
+    row = ExcelWriterRow(1, [ExcelWriterCell(content='a'), ExcelWriterCell(content='b'), ExcelWriterCell(content='c')])
+    print(row.get_cells)
+    exit()
+
     """
     参数说明
     -T --operation_type：【三个可选参数reader、writer和update】分别控制演示读取、写入和修改原表三个功能
