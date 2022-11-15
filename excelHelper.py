@@ -547,7 +547,7 @@ class ExcelWriterCell:
 
     def __init__(
             self,
-            content='',
+            content: str = '',
             coordinate: str = None,
             font_name: str = None,
             font_color: str = None,
@@ -575,7 +575,7 @@ class ExcelWriterCell:
         """
         初始化
         :param content: 单元格内容
-        :type content: Any
+        :type content: str
         :param coordinate: 单元格所在坐标
         :type coordinate: str
         :param font_name: 字体
@@ -1219,62 +1219,58 @@ class ExcelWriterCell:
 
 
 class ExcelWriterRow:
+    _cells: List[ExcelWriterCell] = []
     _row_index: int = None
-    _cells: Dict[str, ExcelWriterCell] = {}
 
-    def __init__(self, row_index: int, cells: List[ExcelWriterCell] = None):
-        """
-        初始化
-        :param row_index: 行索引
-        :type row_index: int
-        :param cells: 单元格
-        :type cells: List[ExcelWriterCell]
-        """
+    def __init__(self, row_index: int, excel_writer_cells: List[ExcelWriterCell]):
         self._row_index = row_index
-        if cells is not None:
-            for column_index, cell in enumerate(cells):
-                self._cells.setdefault(openpyxl.utils.get_column_letter(column_index + 1), cell)
+        for column_index, excel_writer_cell in enumerate(excel_writer_cells):
+            excel_writer_cell.set_coordinate(f'{openpyxl.utils.get_column_letter(column_index + 1)}{row_index}')
+        self._cells = excel_writer_cells
 
     @property
     def get_row_index(self) -> int:
         """
         获取行索引
-        :return: 行索引
-        :rtype: int
+        :return:
+        :rtype:
         """
         return self._row_index
 
     def set_row_index(self, row_index: int) -> __init__:
         """
         设置行索引
-        :param row_index: 行索引
-        :type row_index: int
-        :return: 本类对象
-        :rtype: excelHelper.ExcelWriterRow
+        :param row_index:
+        :type row_index:
+        :return:
+        :rtype:
         """
         self._row_index = row_index
         return self
 
     @property
-    def get_cells(self) -> Dict[str, ExcelWriterCell]:
+    def get_cells(self) -> List[ExcelWriterCell]:
         """
         获取单元格组
-        :return: 若干单元格组成的数组（数组下标自动转列编号）
-        :rtype: Dict[str,ExcelWriterCell]
+        :return: 若干单元格组成的字典
+        :rtype: Dict[str:ExcelWriterCell]
         """
         return self._cells
 
-    def set_cells(self, cells: List[ExcelWriterCell]) -> __init__:
+    def set_cells(self, row_index: int, cells: List[ExcelWriterCell]) -> __init__:
         """
         设置单元格组
+        :param row_index: 行索引
+        :type row_index: int
         :param cells: 字典形式的单元格组合
         :type cells: List[ExcelWriterCell]
         :return: 本类对象
         :rtype: excelHelper.ExcelWriterRow
         """
-        for column_index, cell in enumerate(cells):
-            cell.set_coordinate(f'{openpyxl.utils.get_column_letter(column_index + 1)}{self._row_index}')
-            self._cells.setdefault(openpyxl.utils.get_column_letter(column_index + 1), cell)
+        self._row_index = row_index
+        for column_index, cells in enumerate(cells):
+            cell.set_coordinate(f'{openpyxl.utils.get_column_letter(column_index + 1)}{row_index}')
+        self._cells = cells
         return self
 
 
@@ -1371,12 +1367,14 @@ class ExcelWriter:
     def add_row(self, excel_writer_row: ExcelWriterRow) -> __init__:
         """
         添加行
-        :param excel_writer_row:
-        :type excel_writer_row:
+        :param excel_writer_row: 行数据
+        :type excel_writer_row: ExcelWriterRow
         :return: 本类对象
-        :rtype: excelHelper.ExcelWriter
+        :rtype: ExcelWriterCell
         """
-
+        for excel_writer_cell in excel_writer_row.get_cells:
+            self.add_cell(excel_writer_cell)
+        return self
 
     def set_auto_filter_by_coordinate(self, original_cell_coordinate: str, finished_cell_coordinate: str) -> __init__:
         """
@@ -1518,7 +1516,17 @@ class ExcelWriter:
         self._sheet.freeze_panes = cell_coordinate
         return self
 
-    def add_chart_bar(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_bar(
+            self,
+            original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         添加条形图
         :param original_row:
@@ -1548,11 +1556,26 @@ class ExcelWriter:
             chart.x_axis.title = x_axis_title
         if y_axis_title is not None:
             chart.y_axis.title = y_axis_title
-        chart.add_data(values)
+        chart.add_data(values, titles_from_data=True)
+
+        # 设置分组
+        x_label = openpyxl.chart.Reference(self._sheet, min_col=original_col, min_row=original_row, max_row=finished_row)
+        chart.set_categories(x_label)
+
         self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
-    def add_chart_line(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_line(
+            self,
+            original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         设置折线图
         :param original_row:
@@ -1582,11 +1605,21 @@ class ExcelWriter:
             chart.x_axis.title = x_axis_title
         if y_axis_title is not None:
             chart.y_axis.title = y_axis_title
-        chart.add_data(values)
+        chart.add_data(values, titles_from_data=True)
         self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
-    def add_chart_scatter(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_scatter(
+            self,
+            original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         添加散点图
         :param original_row:
@@ -1616,11 +1649,21 @@ class ExcelWriter:
             chart.x_axis.title = x_axis_title
         if y_axis_title is not None:
             chart.y_axis.title = y_axis_title
-        chart.add_data(values)
+        chart.add_data(values, titles_from_data=True)
         self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
-    def add_chart_pie(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_pie(
+            self,
+            original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         添加饼图
         :param original_row:
@@ -1650,7 +1693,7 @@ class ExcelWriter:
             chart.x_axis.title = x_axis_title
         if y_axis_title is not None:
             chart.y_axis.title = y_axis_title
-        chart.add_data(values)
+        chart.add_data(values, titles_from_data=True)
         self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
@@ -1665,10 +1708,6 @@ class ExcelWriter:
 
 
 if __name__ == '__main__':
-    row = ExcelWriterRow(1, [ExcelWriterCell(content='a'), ExcelWriterCell(content='b'), ExcelWriterCell(content='c')])
-    print(row.get_cells)
-    exit()
-
     """
     参数说明
     -T --operation_type：【三个可选参数reader、writer和update】分别控制演示读取、写入和修改原表三个功能
@@ -1750,6 +1789,35 @@ if __name__ == '__main__':
                 set_freeze_panes('B2'). \
                 save()
 
+        # 设置一行单元格写入
+        with ExcelWriter(filename=os.path.join(sys.path[0], 'test-2.xlsx') if relative_path else 'test-2.xlsx') as xlwt:
+            # 定义表头
+            xlwt.add_row(
+                ExcelWriterRow(row_index=1, excel_writer_cells=[
+                    ExcelWriterCell(content='姓名'),
+                    ExcelWriterCell(content='工龄'),
+                    ExcelWriterCell(content='销售额'),
+                ])
+            )
+
+            # 定义销售表单
+            data = [
+                {'姓名': '张三', '工龄': 5, '销售额': 5000, },
+                {'姓名': '李四', '工龄': 7, '销售额': 7000, },
+                {'姓名': '王五', '工龄': 6, '销售额': 6000, },
+                {'姓名': '赵六', '工龄': 10, '销售额': 8888, },
+            ]
+            for idx, datum in enumerate(data):
+                a, b, c = datum.values()
+                xlwt.add_row(
+                    ExcelWriterRow(row_index=idx + 2, excel_writer_cells=[
+                        ExcelWriterCell(content=a).set_font_color(font_color='FF0000', when=True),
+                        ExcelWriterCell(content=b).set_font_color(font_color='00FF00'),
+                        ExcelWriterCell(content=c, font_color='0000FF'),
+                    ])
+                )
+            xlwt.save()
+
         # 制作Excel图表
         with ExcelWriter(filename=os.path.join(sys.path[0], 'test-3.xlsx') if relative_path else 'test-3.xlsx') as xlwt:
             xlwt. \
@@ -1769,9 +1837,6 @@ if __name__ == '__main__':
                 add_chart_pie(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='I4'). \
                 save()
 
-        # 设置一行单元格写入
-        with ExcelWriter(filename=os.path.join(sys.path[0], 'test-2.xlsx') if relative_path else 'test-2.xlsx') as xlwt:
-            pass
 
     elif operation_type == 'update':
         # 修改表格
