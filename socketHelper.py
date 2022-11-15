@@ -61,6 +61,8 @@ class SocketClient:
 	
 	def connect(self):
 		self._socket_client.connect((self.get_ip_addr, self.get_port_number))
+		recv = self._socket_client.recv(1024)
+		print('ok', recv.decode('utf-8'))
 
 
 class SocketServer:
@@ -94,16 +96,16 @@ class SocketServer:
 		print(f'开启监听{self._ip_addr}:{self._port_number}')
 		while True:
 			conn, addr = self._socket_server.accept()
-			print(f'链接成功：{addr}')
+			print(f'\033[6;36m服务器端消息\033[0m链接成功：{addr}')
 			
-			conn.sendall('链接成功'.encode('utf-8'))
+			conn.sendall(f'链接成功：{addr}'.encode('utf-8'))
 			
-			while True:
-				# 接收消息
-				data = conn.recv(1024)
-				if not data:
-					break
-				when_recv(conn, addr, data)
+			# while True:
+			# 	# 接收消息
+			# 	data = conn.recv(1024)
+			# 	if not data:
+			# 		break
+			# 	when_recv(conn, addr, data)
 			# data_string = data.decode('utf-8')
 			
 			#  回复消息
