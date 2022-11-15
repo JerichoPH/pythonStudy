@@ -339,7 +339,16 @@ class ExcelReader:
         self._sheet.freeze_panes = cell_coordinate
         return self
 
-    def add_chart_bar(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_bar(
+            self, original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         添加条形图
         :param original_row:
@@ -369,11 +378,26 @@ class ExcelReader:
             chart.x_axis.title = x_axis_title
         if y_axis_title is not None:
             chart.y_axis.title = y_axis_title
-        chart.add_data(values)
+        chart.add_data(values, titles_from_data=True)
+
+        # 设置分组
+        x_label = openpyxl.chart.Reference(self._sheet, min_col=original_col, min_row=original_row, max_row=finished_row)
+        chart.set_categories(x_label)
+
         self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
-    def add_chart_line(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_line(
+            self,
+            original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         设置折线图
         :param original_row:
@@ -407,7 +431,17 @@ class ExcelReader:
         self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
-    def add_chart_scatter(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_scatter(
+            self,
+            original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         添加散点图
         :param original_row:
@@ -441,7 +475,17 @@ class ExcelReader:
         self._sheet.add_chart(chart, chart_target_coordinate)
         return self
 
-    def add_chart_pie(self, original_row: int, original_col: int, finished_row: int, finished_col: int, chart_target_coordinate: str, chart_title: str = None, x_axis_title: str = None, y_axis_title: str = None):
+    def add_chart_pie(
+            self,
+            original_row: int,
+            original_col: int,
+            finished_row: int,
+            finished_col: int,
+            chart_target_coordinate: str,
+            chart_title: str = None,
+            x_axis_title: str = None,
+            y_axis_title: str = None
+    ):
         """
         添加饼图
         :param original_row:
