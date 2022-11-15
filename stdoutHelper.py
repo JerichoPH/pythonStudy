@@ -3,9 +3,9 @@ from typing import Any
 
 class StdoutHelper:
 	_content = None
-	_fg_color = '37'  # 默认白色
-	_bg_color = '40'  # 默认黑色
-	_style = '0'  # 终端默认
+	_fg_color = ''  # 默认白色
+	_bg_color = ''  # 默认黑色
+	_style = ''  # 终端默认
 	
 	ORIGINAL = '\033['
 	FINISHED = '\033[0m'
@@ -29,8 +29,14 @@ class StdoutHelper:
 	STYLE_INVISIBLE = '8'  # 不可见
 	STYLE_DELETE_LINE = '9'  # 删除线
 	
-	def __init__(self, content: Any):
+	def __init__(self, content: Any, fg_color: str = None, bg_color: str = None, style: str = None):
 		self._content = content
+		if fg_color is not None:
+			self._fg_color = fg_color
+		if bg_color is not None:
+			self._bg_color = bg_color
+		if style is not None:
+			self._style = style
 	
 	def set_fg_color(self, fg_color: str) -> __init__:
 		"""
@@ -64,6 +70,86 @@ class StdoutHelper:
 		"""
 		self._style = style
 		return self
+	
+	@staticmethod
+	def wrong(content: Any, style: str = None):
+		"""
+		标记为错误
+		:param content:
+		:type content:
+		:param style:
+		:type style:
+		:return:
+		:rtype:
+		"""
+		stdoutHelper = StdoutHelper(content).set_fg_color(StdoutHelper.COLOR_WHITE).set_bg_color(StdoutHelper.COLOR_RED).set_style(StdoutHelper.STYLE_HIGHLIGHT)
+		if style is not None:
+			stdoutHelper.set_style(style)
+		return stdoutHelper
+	
+	@staticmethod
+	def warning(content: Any, style: str = None):
+		"""
+		标记为警告
+		:param content:
+		:type content:
+		:param style:
+		:type style:
+		:return:
+		:rtype:
+		"""
+		stdoutHelper = StdoutHelper(content).set_fg_color(StdoutHelper.COLOR_BLACK).set_bg_color(StdoutHelper.COLOR_YELLOW).set_style(StdoutHelper.STYLE_ITALIC)
+		if style is not None:
+			stdoutHelper.set_style(style)
+		return stdoutHelper
+	
+	@staticmethod
+	def success(content: Any, style: str = None):
+		"""
+		标记为成功
+		:param content:
+		:type content:
+		:param style:
+		:type style:
+		:return:
+		:rtype:
+		"""
+		stdoutHelper = StdoutHelper(content).set_fg_color(StdoutHelper.COLOR_WHITE).set_bg_color(StdoutHelper.COLOR_GREEN).set_style(StdoutHelper.STYLE_DEFAULT)
+		if style is not None:
+			stdoutHelper.set_style(style)
+		return stdoutHelper
+	
+	@staticmethod
+	def info(content: Any, style: str = None):
+		"""
+		标记为信息
+		:param content:
+		:type content:
+		:param style:
+		:type style:
+		:return:
+		:rtype:
+		"""
+		stdoutHelper = StdoutHelper(content).set_fg_color(StdoutHelper.COLOR_BLACK).set_bg_color(StdoutHelper.COLOR_BLUE).set_style(StdoutHelper.STYLE_ITALIC)
+		if style is not None:
+			stdoutHelper.set_style(style)
+		return stdoutHelper
+	
+	@staticmethod
+	def comment(comment: Any, style: str = None):
+		"""
+		标记为注释
+		:param comment:
+		:type comment:
+		:param style:
+		:type style:
+		:return:
+		:rtype:
+		"""
+		stdoutHelper = StdoutHelper(comment).set_fg_color(StdoutHelper.COLOR_BLACK).set_bg_color(StdoutHelper.COLOR_CYAN).set_style(StdoutHelper.STYLE_ITALIC)
+		if style is not None:
+			stdoutHelper.set_style(style)
+		return stdoutHelper
 	
 	def print(self, sep=' ', end='') -> None:
 		"""
@@ -162,4 +248,12 @@ if __name__ == '__main__':
 	StdoutHelper('样式 >> 9删除线').set_bg_color(StdoutHelper.COLOR_RED).set_fg_color(StdoutHelper.COLOR_WHITE).set_style(StdoutHelper.STYLE_DELETE_LINE).print_line()
 	print('-' * 50)
 	d = {'a': 'A', 'b': 'B'}
-	StdoutHelper(content=d).set_fg_color(StdoutHelper.COLOR_GREEN).set_bg_color(StdoutHelper.COLOR_WHITE).set_style(StdoutHelper.STYLE_BLINK).print()
+	l = [1, 2, 3]
+	StdoutHelper(content=d).set_fg_color(StdoutHelper.COLOR_GREEN).set_bg_color(StdoutHelper.COLOR_WHITE).set_style(StdoutHelper.STYLE_BLINK).print_line()
+	StdoutHelper(content=l, fg_color=StdoutHelper.COLOR_RED, bg_color=StdoutHelper.COLOR_WHITE, style=StdoutHelper.STYLE_ITALIC).print_line()
+	StdoutHelper.wrong('错误信息').print_line()
+	StdoutHelper.warning('警告信息').print_line()
+	StdoutHelper.info('消息提醒').print_line()
+	StdoutHelper.comment('注释信息').print_line()
+	StdoutHelper.success('成功信息').print_line()
+	StdoutHelper('普通信息').print_line()
