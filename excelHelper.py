@@ -61,7 +61,7 @@ class ExcelReader:
         :return: 本类对象
         :rtype: excelReader.ExcelReader.ExcelReader
         """
-        self._title = [str(cell.value) for cell in tuple(self._sheet.rows)[self.get_read_title_row_number]]
+        self._title = [str(cell.value) for cell in tuple(self._sheet.rows)[self.get_read_title_row_number - 1]]
         return self
 
     def read_rows(self) -> __init__:
@@ -199,7 +199,7 @@ class ExcelReader:
         :return: 行标
         :rtype: int
         """
-        return self._read_title_row_number if self._read_title_row_number else 0
+        return self._read_title_row_number
 
     def set_read_title_row_number(self, row_number: int) -> __init__:
         """
@@ -1880,7 +1880,6 @@ if __name__ == '__main__':
                 add_chart_scatter(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='H3'). \
                 add_chart_pie(original_row=2, original_col=1, finished_row=5, finished_col=2, chart_target_coordinate='I4'). \
                 save()
-
 
     elif operation_type == 'update':
         # 修改表格
