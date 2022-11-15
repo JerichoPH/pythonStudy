@@ -100,8 +100,8 @@ class SocketServer:
                 #  回复消息
                 # conn.sendall(f'已接收消息：{data_string}'.encode('utf-8'))
 
-            # print('断开链接')
-            # conn.close()
+            print('断开链接')
+            conn.close()
 
     def get_socket(self) -> socket.socket:
         """
