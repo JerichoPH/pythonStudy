@@ -121,7 +121,7 @@ class StdoutHelper:
         :return: 起始标记
         :rtype: str
         """
-        return f'{self.ORIGINAL}{";".join(list(filter(lambda x: x, [self.get_style, self.get_fg_color, self.get_bg_color])))}m'
+        return f'{self.ORIGINAL}{";".join(list(filter(None, [self.get_style, self.get_fg_color, self.get_bg_color])))}m'
 
     @property
     def get_finished(self) -> str:
