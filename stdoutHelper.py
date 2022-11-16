@@ -206,20 +206,31 @@ class StdoutHelper:
         return ins
 
     @staticmethod
-    def comment(comment: Any, style: str = None):
+    def comment(content: Any, style: str = None) -> __init__:
         """
         标记为注释
-        :param comment:
-        :type comment:
+        :param content:
+        :type content:
         :param style:
         :type style:
         :return:
         :rtype:
         """
-        ins = StdoutHelper(comment).set_fg_color(StdoutHelper.COLOR_BLACK).set_bg_color(StdoutHelper.COLOR_CYAN).set_style(StdoutHelper.STYLE_ITALIC)
+        ins = StdoutHelper(content).set_fg_color(StdoutHelper.COLOR_BLACK).set_bg_color(StdoutHelper.COLOR_CYAN).set_style(StdoutHelper.STYLE_ITALIC)
         if style is not None:
             ins.set_style(style)
         return ins
+
+    @staticmethod
+    def normal(content: Any) -> __init__:
+        """
+        普通消息
+        :param content:
+        :type content:
+        :return:
+        :rtype:
+        """
+        return StdoutHelper(content)
 
 
 if __name__ == '__main__':
@@ -286,4 +297,4 @@ if __name__ == '__main__':
     StdoutHelper.info('消息提醒').print_line()
     StdoutHelper.comment('注释信息').print_line()
     StdoutHelper.success('成功信息').print_line()
-    StdoutHelper('普通信息').print_line()
+    StdoutHelper.normal('普通消息').print_line()
