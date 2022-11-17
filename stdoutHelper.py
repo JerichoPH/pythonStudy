@@ -1,12 +1,20 @@
 from typing import Any
 
 
+def content_wrong(content: Any, style: str = None) -> list:
+	return StdoutHelper.wrong(content, style).get_content
+
+
 def print_wrong(content: Any, style: str = None) -> None:
 	StdoutHelper.wrong(content, style).print()
 
 
 def println_wrong(content: Any, style: str = None) -> None:
 	StdoutHelper.wrong(content, style).println()
+
+
+def content_warning(content: Any, style: str = None) -> list:
+	return StdoutHelper.warning(content, style).get_content
 
 
 def print_warning(content: Any, style: str = None) -> None:
@@ -17,12 +25,20 @@ def println_warning(content: Any, style: str = None) -> None:
 	StdoutHelper.warning(content, style).println()
 
 
+def content_info(content: Any, style: str = None) -> list:
+	return StdoutHelper.info(content, style).get_content
+
+
 def print_info(content: Any, style: str = None) -> None:
 	StdoutHelper.info(content, style).print()
 
 
 def println_info(content: Any, style: str = None) -> None:
 	StdoutHelper.info(content, style).println()
+
+
+def content_comment(content: Any, style: str = None) -> list:
+	return StdoutHelper.comment(content, style).get_content
 
 
 def print_comment(content: Any, style: str = None) -> None:
@@ -33,12 +49,20 @@ def println_comment(content: Any, style: str = None) -> None:
 	StdoutHelper.comment(content, style).println()
 
 
+def content_success(content: Any, style: str = None) -> list:
+	return StdoutHelper.success(content, style).get_content
+
+
 def print_success(content: Any, style: str = None) -> None:
 	StdoutHelper.success(content, style).print()
 
 
 def println_success(content: Any, style: str = None) -> None:
 	StdoutHelper.success(content, style).println()
+
+
+def content_normal(content: Any) -> list:
+	return StdoutHelper.normal(content).get_content
 
 
 def print_normal(content: Any) -> None:
