@@ -31,11 +31,10 @@ if __name__ == '__main__':
         fix_identity_codes = [datum['唯一编号'] for datum in fix_data.values()]
         for row_datum in fix_data.values():
             fix_identity_codes_to_row_number.setdefault(row_datum['唯一编号'], row_datum)
-        print(f'读取：', *StdoutHelper.info(filename).get_content, '完成')
+        print(f'读取：', *StdoutHelper.info(filename).get_content, *StdoutHelper.success('完成'))
 
     # 取两者交集
-    StdoutHelper.comment('开始对比').print_line()
-    print('开始比对')
+    stdoutHelper.print_comment('开始对比')
     filename = os.path.join(sys.path[0], f'{paragraph_name}-重复-器材.xlsx')
     intersection = set(ele_identity_codes).intersection(fix_identity_codes)
 
@@ -61,4 +60,4 @@ if __name__ == '__main__':
                 excelHelper.ExcelWriterCell(content=ele_identity_codes_to_row_number[identity_code]['型号'] if identity_code in ele_identity_codes_to_row_number else ''),
             ]))
         xlwt.save()
-    print(f'比对完成，保存到{filename}')
+    stdoutHelper.println_success(f'比对完成，保存到{filename}')
