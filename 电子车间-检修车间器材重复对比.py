@@ -5,6 +5,8 @@ import sys
 from datetime import time, datetime
 
 import excelHelper
+import stdoutHelper
+from stdoutHelper import StdoutHelper
 
 parser = argparse.ArgumentParser()
 parser.description = '比对检修车间和电子车间重复器材'
@@ -20,7 +22,7 @@ if __name__ == '__main__':
         ele_identity_codes = [datum['唯一编号'] for datum in ele_data.values()]
         for row_datum in ele_data.values():
             ele_identity_codes_to_row_number.setdefault(row_datum['唯一编号'], row_datum)
-        print(f'读取：{filename}完成')
+        print(f'读取：', *StdoutHelper.info(filename).get_content, '完成')
 
     filename = os.path.join(sys.path[0], f'{paragraph_name}-检修车间-器材.xlsx')
     with excelHelper.ExcelReader(filename) as xlrd:
@@ -29,9 +31,10 @@ if __name__ == '__main__':
         fix_identity_codes = [datum['唯一编号'] for datum in fix_data.values()]
         for row_datum in fix_data.values():
             fix_identity_codes_to_row_number.setdefault(row_datum['唯一编号'], row_datum)
-        print(f'读取：{filename}完成')
+        print(f'读取：', *StdoutHelper.info(filename).get_content, '完成')
 
     # 取两者交集
+    StdoutHelper.comment('开始对比').print_line()
     print('开始比对')
     filename = os.path.join(sys.path[0], f'{paragraph_name}-重复-器材.xlsx')
     intersection = set(ele_identity_codes).intersection(fix_identity_codes)
