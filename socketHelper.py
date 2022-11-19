@@ -1,6 +1,8 @@
 import argparse
 import socket
 
+import stdoutHelper
+
 
 class SocketClient:
 	_socket_client = None
@@ -96,20 +98,13 @@ class SocketServer:
 		print(f'开启监听{self._ip_addr}:{self._port_number}')
 		while True:
 			conn, addr = self._socket_server.accept()
-			print(f'\033[6;36m服务器端消息\033[0m链接成功：{addr}')
+			print(*stdoutHelper.content_info('服务器端消息，链接成功'), *stdoutHelper.content_comment(addr))
 			
 			conn.sendall(f'链接成功：{addr}'.encode('utf-8'))
 			
-			# while True:
-			# 	# 接收消息
-			# 	data = conn.recv(1024)
-			# 	if not data:
-			# 		break
-			# 	when_recv(conn, addr, data)
-			# data_string = data.decode('utf-8')
-			
-			#  回复消息
-			# conn.sendall(f'已接收消息：{data_string}'.encode('utf-8'))
+			buf = conn.recv(2048)
+			conn.send(b'HTTP/1.1 200 OK\r\n\r\n')
+			conn.send(b'Hello Python')
 			
 			print('断开链接')
 			conn.close()
