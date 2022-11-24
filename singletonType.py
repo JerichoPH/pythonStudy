@@ -5,4 +5,6 @@ class SingletonType(type):
         if not self._instance:
             self._instance = self.__new__(self)
 
+        self.__init__(self._instance, *args, **kwargs)
+
         return self._instance
