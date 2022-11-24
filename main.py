@@ -1,10 +1,11 @@
 from singletonType import SingletonType
 
 
-class SingletonCls(object, metaclass=SingletonType):
+class SingletonCls(SingletonType):
     _a = 0
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        print(args)
         pass
 
     @property
