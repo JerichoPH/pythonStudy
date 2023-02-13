@@ -19,7 +19,7 @@ def read_excel(file_name: str) -> dict:
     install_shelves = {}
 
     with excelHelper.ExcelReader(file_name) as xlrd:
-        excel_data = xlrd.set_sheet_by_index(0).set_original_row_number(2).auto_rows().to_dict
+        excel_data = xlrd.auto_rows().to_dict
 
         for excel_datum in excel_data.values():
             install_shelves[excel_datum['架编码']] = excel_datum['名称']
@@ -48,10 +48,10 @@ if __name__ == '__main__':
 
     # 记录重复的编号
     repeats = []
-    for _,datum in enumerate(repeat_unique_codes):
+    for _, datum in enumerate(repeat_unique_codes):
         repeats.append(datum)
 
-    for _,datum in enumerate(repeat_full_names):
+    for _, datum in enumerate(repeat_full_names):
         if datum in fix_install_shelves_flip:
             repeats.append(fix_install_shelves_flip[datum])
 
