@@ -74,6 +74,14 @@ class ExcelReader:
         self._content = [[str(cell.value) for cell in row_datum] for row_datum in tuple(self._sheet.rows)[self.get_original_row_number - 1:self.get_finished_row_number if self.get_finished_row_number else None]]
         return self
 
+    def auto_rows(self, sheet_by_index: int = 0, original_row_number: int = 2) -> __init__:
+        """
+        通过自动表头读取多行数据
+        :return: 本类对象
+        :rtype: excelHelper.ExcelReader
+        """
+        return self.set_sheet_by_index(sheet_by_index).set_original_row_number(original_row_number).read_title().read_rows()
+
     def read_entire_sheet_by_first(self) -> __init__:
         """
         读取第一个sheet
